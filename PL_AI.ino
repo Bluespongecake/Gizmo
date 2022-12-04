@@ -83,15 +83,17 @@ void setup() {
   current_x = 180;
   current_y = 150;
 
-  //TEST CODE - SINGLE RUN 
-//  move_pen(32, 0);
-//  draw(300, 0);
-//  move_pen(-300, 0);
-//  move_pen(-32, 0);
+  //TEST CODE - SINGLE RUN
 
-  move_pen(200, 0);
-  move_pen(0, 200);
-  move_pen(0, -200);
+  move_pen(80,250);
+  draw(0,-150); 
+  move_pen
+  return_home(); 
+// draw the board outline
+//  move_pen(0, 30);
+//  move_pen(30, 0);
+
+  
   
 //    move_pen(0,120); 
 //    move_pen(50,0);
@@ -133,37 +135,37 @@ void pen_down() {
 void draw(int change_x, int change_y){
   lcd_drawing_message();
   pen_down();
-  Serial.print("current pos: (");
-  Serial.print(current_x);
-  Serial.print(" ");
-  Serial.print(current_y);
-  Serial.print("/n");
   steps_to_be_made = turns_to_dist(current_x, current_y, change_x, change_y, 40, 625, 3200);
   x_steps_to_be_made = steps_to_be_made[1];
   y_steps_to_be_made = steps_to_be_made[0];
   stepper_speed_ratio(x_steps_to_be_made, y_steps_to_be_made, 40);
   current_x = current_x + change_x;
-  current_y = current_y - change_y;
+  current_y = current_y + change_y;
   pen_up();
   lcd_start_message();
+  
+  Serial.print("moving to pos: (");
+  Serial.print(current_x);
+  Serial.print(" ");
+  Serial.println(current_y);
 }
 
 // method to move pen from one cartesian coordinate to another
 void move_pen(int change_x, int change_y){
   lcd_drawing_message();
   pen_up(); 
-  Serial.print("current pos: (");
-  Serial.print(current_x);
-  Serial.print(" ");
-  Serial.print(current_y);
-  Serial.print("/n");
   steps_to_be_made = turns_to_dist(current_x, current_y, change_x, change_y, 40, 625, 3200);
   x_steps_to_be_made = steps_to_be_made[1];
   y_steps_to_be_made = steps_to_be_made[0];
   stepper_speed_ratio(x_steps_to_be_made, y_steps_to_be_made, 40);
   current_x = current_x + change_x;
-  current_y = current_y - change_y;
+  current_y = current_y + change_y;
   lcd_start_message(); 
+
+  Serial.print("moving to pos: (");
+  Serial.print(current_x);
+  Serial.print(" ");
+  Serial.println(current_y);
 }
 
 void draw_TTC_grid() {
@@ -225,6 +227,10 @@ void wipe_board(){
   for (int i = 0; i < 5; i++){
     single_wipe();
   };
+}
+
+void return_home(){
+  move_pen(180-current_x,150-current_y);
 }
 
 // display scrolling message on LCD
@@ -306,9 +312,11 @@ int * turns_to_dist(int start_x, int start_y, int x_dist_delta, int y_dist_delta
     int rot_left = steps_per_rot * (delta_belt_dist_left) / pulley_diameter;
     int rot_right = steps_per_rot * (delta_belt_dist_right) / pulley_diameter;
     
-    rotations[0] = rot_left;
+    rotations[1] = rot_left;
+    Serial.print("L: ");
     Serial.println(rot_left);
-    rotations[1] = rot_right;
+    rotations[0] = rot_right;
+    Serial.print("R: ");
     Serial.println(rot_right);
 
     // determine whether to rotate each motor cw or ccw
@@ -383,4 +391,8 @@ void stepper_speed_ratio(int x_steps, int y_steps, int steps_per) {
         y_completed++;
         single_step_y();
     }
+    Serial.print("X completed: ");
+    Serial.println(x_completed);
+    Serial.print("Y completed: ");
+    Serial.println(y_completed);
 } 
