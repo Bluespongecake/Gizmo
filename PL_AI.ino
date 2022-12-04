@@ -84,32 +84,9 @@ void setup() {
   current_y = 150;
 
   //TEST CODE - SINGLE RUN
+  draw_TTC_grid(); 
 
-  move_pen(80,250);
-  draw(0,-150); 
-  move_pen
-  return_home(); 
-// draw the board outline
-//  move_pen(0, 30);
-//  move_pen(30, 0);
-
-  
-  
-//    move_pen(0,120); 
-//    move_pen(50,0);
-//    draw(130,0); 
-//    move_pen(0,180);
-//    draw(-140,0); 
-//    move_pen(0,-100);
-//    draw(20, 150);
-//  move_pen(-50,120);
-//  draw(125,0);
-//  move_pen(0, 200);
-//  draw(-125,20);
-//  move_pen(50,-60); 
-//  draw(30,250);
-
-//  wipe_board();
+  //wipe_board();
   
  
 }
@@ -169,7 +146,15 @@ void move_pen(int change_x, int change_y){
 }
 
 void draw_TTC_grid() {
-
+  move_pen(60,280);
+  draw(0,-200); 
+  move_pen(85,0);
+  draw(0,200); 
+  move_pen(75, -70);
+  draw(-220,0);
+  move_pen(0, -75);
+  draw(220,0);
+  return_home(); 
 }
 
 // test method
@@ -189,26 +174,26 @@ void line_down_center() {
 //run L motor 1 step
 void single_step_x(){
     digitalWrite(X_STEP_PIN, HIGH);
-    delayMicroseconds(300);
+    delayMicroseconds(200);
     digitalWrite(X_STEP_PIN, LOW);
-    delayMicroseconds(300);
+    delayMicroseconds(200);
 }
 
 // run R motor 1 step
 void single_step_y(){
 
     digitalWrite(Y_STEP_PIN, HIGH);
-    delayMicroseconds(300);
+    delayMicroseconds(200);
     digitalWrite(Y_STEP_PIN, LOW);
-    delayMicroseconds(300);
+    delayMicroseconds(200);
 }
 
 //wiper motor
 void single_step_z_cw(){
     digitalWrite(Z_STEP_PIN, HIGH);
-    delayMicroseconds(100);
+    delayMicroseconds(150);
     digitalWrite(Z_STEP_PIN, LOW);
-    delayMicroseconds(100);
+    delayMicroseconds(150);
 }
 
 void single_wipe() {
