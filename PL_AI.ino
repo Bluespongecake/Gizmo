@@ -31,14 +31,11 @@ int current_x;
 int current_y;
 
 //Store steps to be made 
-int x_change; 
-int y_change; 
-int x_steps_new;
-int y_steps_new;
-int * steps_new;
+int x_steps_to_be_made;
+int y_steps_to_be_made;
+int * steps_to_be_made;
 
 //Pin declerations
-
 
 //Initialising objects
 Servo penServo;
@@ -70,22 +67,17 @@ void setup() {
   lcd_start_message();
 
   //Setting home co-ordinates
-  //Start "home" at (320,145);
-  current_x = 220;
-  current_y = 156;
+  //Start "home" at (265,125);
+  current_x = 325;
+  current_y = 185;
 
-  //SINGLE TEST CODE GOES HERE
-  move_pen(0, -200);
-  Serial.println(String(current_x) + ", " + String(current_y));
-  move_pen(-50, 0);
-  Serial.println(String(current_x) + ", " + String(current_y));
-  draw(250, 0); 
-  Serial.println(String(current_x) + ", " + String(current_y));
-  move_pen(-250,0);
-  Serial.println(String(current_x) + ", " + String(current_y));
+  move_pen(0,100); 
+  draw(0,200);
+  draw(150,0);
 }
 
 void loop() {
+  // put your main code here, to run repeatedly:
 
 }
 
@@ -101,23 +93,23 @@ void pen_down() {
 
 void draw(int change_x, int change_y){
   pen_down();
-  steps_new = turns_to_dist(current_x, current_y, change_x, change_y, 40, 625, 3200);
-  x_steps_new = steps_new[1];
-  y_steps_new = steps_new[0];
-  stepper_speed_ratio(x_steps_new, y_steps_new, 35);
+  steps_to_be_made = turns_to_dist(current_x, current_y, change_x, change_y, 40, 625, 3200);
+  x_steps_to_be_made = steps_to_be_made[1];
+  y_steps_to_be_made = steps_to_be_made[0];
+  stepper_speed_ratio(x_steps_to_be_made, y_steps_to_be_made, 40);
   current_x = current_x + change_x;
-  current_y = current_y + change_y;
+  current_y = current_y - change_y;
   pen_up();
 }
 
 void move_pen(int change_x, int change_y){
   pen_up(); 
-  steps_new = turns_to_dist(current_x, current_y, change_x, change_y, 40, 625, 3200);
-  x_steps_new = steps_new[1];
-  y_steps_new = steps_new[0];
-  stepper_speed_ratio(x_steps_new, y_steps_new, 35);
+  steps_to_be_made = turns_to_dist(current_x, current_y, change_x, change_y, 40, 625, 3200);
+  x_steps_to_be_made = steps_to_be_made[1];
+  y_steps_to_be_made = steps_to_be_made[0];
+  stepper_speed_ratio(x_steps_to_be_made, y_steps_to_be_made, 40);
   current_x = current_x + change_x;
-  current_y = current_y + change_y;
+  current_y = current_y - change_y;
 }
 
 void draw_TTC_grid() {
@@ -141,11 +133,6 @@ void line_down_center() {
 }
 
 void single_step_x(){
-  if(x_steps_new < 0){
-    digitalWrite(X_DIR_PIN, HIGH);
-  } else {
-    digitalWrite(X_DIR_PIN, LOW);
-  };
     digitalWrite(X_STEP_PIN, HIGH);
     delayMicroseconds(300);
     digitalWrite(X_STEP_PIN, LOW);
@@ -153,11 +140,6 @@ void single_step_x(){
 }
 
 void single_step_y(){
-  if(y_steps_new < 0){
-    digitalWrite(Y_DIR_PIN, LOW);
-  } else {
-    digitalWrite(Y_DIR_PIN, HIGH);
-  };
     digitalWrite(Y_STEP_PIN, HIGH);
     delayMicroseconds(300);
     digitalWrite(Y_STEP_PIN, LOW);
@@ -165,8 +147,6 @@ void single_step_y(){
 }
 
 void single_step_z_cw(){
-    digitalWrite(Y_DIR_PIN, LOW);
-    
     digitalWrite(Z_STEP_PIN, HIGH);
     delayMicroseconds(400);
     digitalWrite(Z_STEP_PIN, LOW);
@@ -174,7 +154,7 @@ void single_step_z_cw(){
 }
 
 void single_wipe() {
-  digitalWrite(X_DIR_PIN, HIGH);
+  digitalWrite(Z_DIR_PIN, HIGH);
   for (int i = 0; i < 6; i++) {
     for (int n = 0; n < 3200; n++) {
       single_step_z_cw();
@@ -210,8 +190,12 @@ void lcd_display_winner() {
 
 }
 
-void led_strip_countdown() {
+void gesture_start (){
+  
+}
 
+void gesture_end (){
+  
 }
 
 //converts xy distance change to change in motor angles
@@ -232,7 +216,19 @@ int * turns_to_dist(int start_x, int start_y, int x_dist_delta, int y_dist_delta
     //right motor
     int rot_right = steps_per_rot * (delta_belt_dist_right) / pulley_diameter;
     rotations[0] = rot_left;
+    Serial.println(rot_left);
     rotations[1] = rot_right;
+    Serial.println(rot_right);
+    if (rot_left < 0){
+          digitalWrite(X_DIR_PIN, LOW);
+    } else {
+          digitalWrite(X_DIR_PIN, HIGH);
+    };
+    if (rot_right < 0){
+          digitalWrite(Y_DIR_PIN, HIGH);
+    } else {
+          digitalWrite(Y_DIR_PIN, LOW);
+    };
     return rotations;
 }
 
@@ -275,7 +271,6 @@ void stepper_speed_ratio(int x_steps, int y_steps, int steps_per) {
         x_completed++;
         single_step_x();
     }
-
     for(int i = 0; i < y_adj; i++) {
         y_completed++;
         single_step_y();
