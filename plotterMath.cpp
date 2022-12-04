@@ -102,6 +102,9 @@ void stepper_speed_ratio(int x_steps, int y_steps, int steps_per) {
         y_completed++;
         // single_step_y();
     }
+    printf("x_comp: %i\n", x_completed);
+    printf("y_comp: %i\n", y_completed);
+
 
 }
 
@@ -111,7 +114,7 @@ int main(){
     printf("rot_left   = %d\n", rots[0]);
     printf("rot_right   = %d\n", rots[1]);
 
-    stepper_speed_ratio(400, 400, 10);
+    stepper_speed_ratio(-22585, 3389, 10);
 
     return 0;
 }
