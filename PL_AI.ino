@@ -80,13 +80,36 @@ void setup() {
 
   //Setting home co-ordinates
   //Start "home" at (265,125);
-  current_x = 325;
-  current_y = 185;
+  current_x = 180;
+  current_y = 150;
 
   //TEST CODE - SINGLE RUN 
-  move_pen(0,100); 
-  draw(0,200);
-  draw(150,0);
+//  move_pen(32, 0);
+//  draw(300, 0);
+//  move_pen(-300, 0);
+//  move_pen(-32, 0);
+
+  move_pen(200, 0);
+  move_pen(0, 200);
+  move_pen(0, -200);
+  
+//    move_pen(0,120); 
+//    move_pen(50,0);
+//    draw(130,0); 
+//    move_pen(0,180);
+//    draw(-140,0); 
+//    move_pen(0,-100);
+//    draw(20, 150);
+//  move_pen(-50,120);
+//  draw(125,0);
+//  move_pen(0, 200);
+//  draw(-125,20);
+//  move_pen(50,-60); 
+//  draw(30,250);
+
+//  wipe_board();
+  
+ 
 }
 
 void loop() {
@@ -110,6 +133,11 @@ void pen_down() {
 void draw(int change_x, int change_y){
   lcd_drawing_message();
   pen_down();
+  Serial.print("current pos: (");
+  Serial.print(current_x);
+  Serial.print(" ");
+  Serial.print(current_y);
+  Serial.print("/n");
   steps_to_be_made = turns_to_dist(current_x, current_y, change_x, change_y, 40, 625, 3200);
   x_steps_to_be_made = steps_to_be_made[1];
   y_steps_to_be_made = steps_to_be_made[0];
@@ -124,6 +152,11 @@ void draw(int change_x, int change_y){
 void move_pen(int change_x, int change_y){
   lcd_drawing_message();
   pen_up(); 
+  Serial.print("current pos: (");
+  Serial.print(current_x);
+  Serial.print(" ");
+  Serial.print(current_y);
+  Serial.print("/n");
   steps_to_be_made = turns_to_dist(current_x, current_y, change_x, change_y, 40, 625, 3200);
   x_steps_to_be_made = steps_to_be_made[1];
   y_steps_to_be_made = steps_to_be_made[0];
@@ -134,10 +167,7 @@ void move_pen(int change_x, int change_y){
 }
 
 void draw_TTC_grid() {
-  move_pen(0, -200);
-  move_pen(-30, 0);
-  draw(150, 0);
-  move_pen(0,-100);
+
 }
 
 // test method
@@ -164,6 +194,7 @@ void single_step_x(){
 
 // run R motor 1 step
 void single_step_y(){
+
     digitalWrite(Y_STEP_PIN, HIGH);
     delayMicroseconds(300);
     digitalWrite(Y_STEP_PIN, LOW);
@@ -173,18 +204,27 @@ void single_step_y(){
 //wiper motor
 void single_step_z_cw(){
     digitalWrite(Z_STEP_PIN, HIGH);
-    delayMicroseconds(400);
+    delayMicroseconds(100);
     digitalWrite(Z_STEP_PIN, LOW);
-    delayMicroseconds(400);
+    delayMicroseconds(100);
 }
 
 void single_wipe() {
+  lcd_wiping_message();
   digitalWrite(Z_DIR_PIN, HIGH);
   for (int i = 0; i < 6; i++) {
     for (int n = 0; n < 3200; n++) {
       single_step_z_cw();
     }
   }
+  lcd_start_message();
+}
+
+//Run single_wipe five times 
+void wipe_board(){
+  for (int i = 0; i < 5; i++){
+    single_wipe();
+  };
 }
 
 // display scrolling message on LCD
@@ -203,6 +243,7 @@ void lcd_start_message_scrolling() {
   };
 }
 
+// display "PL.AI - Tic-Tac-Toe" on LCD
 void lcd_start_message() {
   lcd.clear();
   lcd.setCursor(6,0);
@@ -216,6 +257,19 @@ void lcd_drawing_message() {
   lcd.clear();
   lcd.setCursor(4,0);
   lcd.print("DRAWING");
+}
+
+// display "WIPING" on LCD
+void lcd_wiping_message() {
+  lcd.clear();
+  lcd.setCursor(4,0);
+  lcd.print("WIPING");
+}
+
+void lcd_user_turn() {
+  lcd.clear();
+  lcd.setCursor(3,0);
+  lcd.print("YOUR TURN");
 }
 
 // self explanatory
@@ -257,16 +311,22 @@ int * turns_to_dist(int start_x, int start_y, int x_dist_delta, int y_dist_delta
     rotations[1] = rot_right;
     Serial.println(rot_right);
 
-    // determine whether to rotate each motor cw or anti cw
+    // determine whether to rotate each motor cw or ccw
     if (rot_left < 0){
           digitalWrite(X_DIR_PIN, LOW);
+          Serial.println("left: ccw");
     } else {
           digitalWrite(X_DIR_PIN, HIGH);
+          Serial.println("left: cw");
+
     };
     if (rot_right < 0){
+          Serial.println("right: cw");
           digitalWrite(Y_DIR_PIN, HIGH);
     } else {
           digitalWrite(Y_DIR_PIN, LOW);
+          Serial.println("right: ccw");
+
     };
     return rotations;
 }

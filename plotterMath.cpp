@@ -107,7 +107,7 @@ void stepper_speed_ratio(int x_steps, int y_steps, int steps_per) {
 
 int main(){
     int *rots;
-    rots = turns_to_dist(265, 125, 0, 400, 40, 625, 3200);
+    rots = turns_to_dist(380, 350, -200, -200, 40, 625, 3200);
     printf("rot_left   = %d\n", rots[0]);
     printf("rot_right   = %d\n", rots[1]);
 
