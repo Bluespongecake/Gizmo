@@ -64,7 +64,7 @@ bool game_end;
 void setup() {
   Serial.begin(9600);
 
-  // set pinmodes for steppers
+  // set pinmodes for all 3 steppers
   pinMode(X_STEP_PIN, OUTPUT);
   pinMode(X_DIR_PIN, OUTPUT);
   pinMode(X_ENABLE_PIN, OUTPUT);
@@ -94,8 +94,13 @@ void setup() {
   //Dispaly start message
   lcd_start_message();
 
+  /*coordinates are defined as follows:
+    x positive: mm horizontally across from the left motor towards the right, parallel to the line between the points where the two pulleys contact the belts
+    y positive: mm vertically downwards from the line between the points where the two pulleys contact the belts
+    keep in mind the coordinates are defined as the location at which the belts would connect if perfectly straight, not where the pen actually is.
+  */
+  //Start "home" at (180,150);
   //Setting home co-ordinates
-  //Start "home" at (265,125);
   current_x = 180;
   current_y = 150;
 
@@ -131,11 +136,12 @@ void loop() {
         digitalWrite(trigPin3, LOW);
         duration3 = pulseIn(echoPin3, HIGH);
         distance3 = duration3 * 0.034 / 2;
-  
+
+        //if a swipe is detected, we run a new game
         if (distance3 < 5){
           game_end = false;
            
-          //draw TTC board
+          //draw the tic tac toe board
           draw_TTC_grid();
           
           distance1 = 0;
@@ -199,6 +205,7 @@ void move_pen(int change_x, int change_y){
   lcd_start_message(); 
 }
 
+//method to draw the tic tac toe grid in the middle of the board
 void draw_TTC_grid() {
   move_pen(60,280);
   draw(0,-200); 
@@ -220,7 +227,7 @@ void draw_TTC_grid() {
   lcd.print("YOUR TURN");
 }
 
-// test method
+// test method for recalibration
 void line_down_center() {
   digitalWrite(X_DIR_PIN, HIGH);
   digitalWrite(Y_DIR_PIN, HIGH);
@@ -244,14 +251,13 @@ void single_step_x(){
 
 // run R motor 1 step
 void single_step_y(){
-
     digitalWrite(Y_STEP_PIN, HIGH);
     delayMicroseconds(200);
     digitalWrite(Y_STEP_PIN, LOW);
     delayMicroseconds(200);
 }
 
-//wiper motor
+//run wiper motor 1 step (we want to rotate this 6 revolutions at a time to rotate the crank 360 degrees)
 void single_step_z_cw(){
     digitalWrite(Z_STEP_PIN, HIGH);
     delayMicroseconds(150);
@@ -259,6 +265,7 @@ void single_step_z_cw(){
     delayMicroseconds(150);
 }
 
+//run a single wipe of the board wipers
 void single_wipe() {
   lcd_wiping_message();
   digitalWrite(Z_DIR_PIN, HIGH);
@@ -321,94 +328,68 @@ void lcd_wiping_message() {
   lcd.print("WIPING");
 }
 
+// tell the user that it's their turn on the LCD
 void lcd_user_turn() {
   lcd.clear();
   lcd.setCursor(3,0);
   lcd.print("YOUR TURN");
 }
 
+// indicate to the user that the bot is making a ply
 void lcd_pl_ai_turn() {
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("MAKING MOVE");
 }
     
-
+// method for a game end scenario
 void end_case(int winner_code){
   lcd_display_winner(winner_code);
   wipe_board();
 }
 
+//a method to draw an x at given coordinates
 void draw_x(int element){
   lcd_pl_ai_turn();
+  //determine top left corner of x to be drawn
   switch (element){
     case 1:
       move_pen(5,90);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home();
     break;   
     case 2:
       move_pen(80,90);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home();
-    break; 
+      break; 
     case 3:
       move_pen(155,90);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home();
       break;
     case 4:
       move_pen(5,170);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home();
       break;
     case 5:
       move_pen(80,170);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home();
       break;
     case 6:
       move_pen(155,170);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home();
       break;
     case 7:
       move_pen(5,230);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home();
       break;
     case 8:
       move_pen(80,230);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home();
       break;
     case 9:
       move_pen(155,230);
-      draw(40,40);
-      move_pen(0,-40);
-      draw(-40,40);
-      return_home(); 
       break; 
+    //draw the x
+    draw(40,40);
+    move_pen(0,-40);
+    draw(-40,40);
+    return_home();
   }
   lcd_user_turn();
 }
 
+//display the winner on the LCD
 void lcd_display_winner(int winner_code) {
   switch (winner_code){
       case 11: 
