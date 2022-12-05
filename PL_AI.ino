@@ -58,6 +58,9 @@ int * steps_to_be_made;
 Servo penServo;
 hd44780_I2Cexp lcd;
 
+//Boolean to check if the game is ended 
+bool game_end;
+
 void setup() {
   Serial.begin(9600);
 
@@ -96,134 +99,65 @@ void setup() {
   current_x = 180;
   current_y = 150;
 
-  //TEST CODE - SINGLE RUN
-  //draw_TTC_grid();  
-
-//  draw_TTC_grid();
-//  draw_x(1);
-//  draw_x(5);
-//  draw_x(9); 
+  //No game currently running
+  game_end = true;
 }
 
 void loop() {
-//  digitalWrite(trigPin1, LOW);
-//  delayMicroseconds(2);
-//  digitalWrite(trigPin1, HIGH);
-//  delayMicroseconds(10);
-//  digitalWrite(trigPin1, LOW);
-//  duration1 = pulseIn(echoPin1, HIGH);
-//  distance1 = duration1 * 0.034 / 2;
-//
-//  digitalWrite(trigPin3, LOW);
-//  delayMicroseconds(2);
-//  digitalWrite(trigPin3, HIGH);
-//  delayMicroseconds(10);
-//  digitalWrite(trigPin3, LOW);
-//  duration3 = pulseIn(echoPin1, HIGH);
-//  distance3 = duration3 * 0.034 / 2;
-//  
-//  
-//  if (distance1 < 5){
-//    digitalWrite(trigPin2, LOW);
-//    delayMicroseconds(2);
-//    digitalWrite(trigPin2, HIGH);
-//    delayMicroseconds(10);
-//    digitalWrite(trigPin2, LOW);
-//    duration2 = pulseIn(echoPin2, HIGH);
-//    distance2 = duration2 * 0.034 / 2;
-//
-//    if (distance2 < 5){
-//      digitalWrite(trigPin3, LOW);
-//      delayMicroseconds(2);
-//      digitalWrite(trigPin3, HIGH);
-//      delayMicroseconds(10);
-//      digitalWrite(trigPin3, LOW);
-//      duration3 = pulseIn(echoPin3, HIGH);
-//      distance3 = duration3 * 0.034 / 2;
-//
-//      if (distance3 < 5){
-//        Serial.println("1 to 3"); 
-//        distance1 = 0;
-//        distance2 = 0;
-//        distance3 =0; 
-//      }
-//    }
-//  } else if (distance3 < 5){
-//    digitalWrite(trigPin2, LOW);
-//    delayMicroseconds(2);
-//    digitalWrite(trigPin2, HIGH);
-//    delayMicroseconds(10);
-//    digitalWrite(trigPin2, LOW);
-//    duration2 = pulseIn(echoPin2, HIGH);
-//    distance2 = duration2 * 0.034 / 2;
-//
-//    if (distance2 < 5){
-//      digitalWrite(trigPin1, LOW);
-//      delayMicroseconds(2);
-//      digitalWrite(trigPin1, HIGH);
-//      delayMicroseconds(10);
-//      digitalWrite(trigPin1, LOW);
-//      duration1 = pulseIn(echoPin1, HIGH);
-//      distance1 = duration1 * 0.034 / 2;
-//
-//      if (distance1 < 5){
-//        Serial.println("3 to 1"); 
-//        distance1 = 0;
-//        distance2 = 0;
-//        distance3 =0; 
-//      }
-//    }
-//  }
-//  distance1 = 0;
-//  distance2 = 0;
-//  distance3 =0;
-
-
-  digitalWrite(trigPin1, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin1, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin1, LOW);
-  duration1 = pulseIn(echoPin1, HIGH);
-  distance1 = duration1 * 0.034 / 2;
-
-  digitalWrite(trigPin3, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin3, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin3, LOW);
-  duration3 = pulseIn(echoPin3, HIGH);
-  distance3 = duration3 * 0.034 / 2;
-
-
-
- if (distance1 < 5){
-    digitalWrite(trigPin2, LOW);
+  //Setting up ultrasonic sensors for recognising swipe down gesture if the game is not ended
+  if (game_end == true){
+    digitalWrite(trigPin1, LOW);
     delayMicroseconds(2);
-    digitalWrite(trigPin2, HIGH);
+    digitalWrite(trigPin1, HIGH);
     delayMicroseconds(10);
-    digitalWrite(trigPin2, LOW);
-    duration2 = pulseIn(echoPin2, HIGH);
-    distance2 = duration2 * 0.034 / 2;
-
-    if (distance2 < 5){
-      digitalWrite(trigPin3, LOW);
+    digitalWrite(trigPin1, LOW);
+    duration1 = pulseIn(echoPin1, HIGH);
+    distance1 = duration1 * 0.034 / 2;
+  
+   if (distance1 < 5){
+      digitalWrite(trigPin2, LOW);
       delayMicroseconds(2);
-      digitalWrite(trigPin3, HIGH);
+      digitalWrite(trigPin2, HIGH);
       delayMicroseconds(10);
-      digitalWrite(trigPin3, LOW);
-      duration3 = pulseIn(echoPin3, HIGH);
-      distance3 = duration3 * 0.034 / 2;
-
-      if (distance3 < 5){
-        Serial.println("1 to 3"); 
-        distance1 = 0;
-        distance2 = 0;
-        distance3 =0; 
+      digitalWrite(trigPin2, LOW);
+      duration2 = pulseIn(echoPin2, HIGH);
+      distance2 = duration2 * 0.034 / 2;
+  
+      if (distance2 < 5){
+        digitalWrite(trigPin3, LOW);
+        delayMicroseconds(2);
+        digitalWrite(trigPin3, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(trigPin3, LOW);
+        duration3 = pulseIn(echoPin3, HIGH);
+        distance3 = duration3 * 0.034 / 2;
+  
+        if (distance3 < 5){
+          game_end = false;
+           
+          //draw TTC board
+          draw_TTC_grid();
+          
+          distance1 = 0;
+          distance2 = 0;
+          distance3 =0; 
+        }
       }
-    }
-  } 
-  delay(300);
+    } 
+  }
+
+  if (game_end == false){
+    if (Serial.available() > 0){
+      int dataIn = Serial.parseInt();
+      if ((dataIn > 0) and (dataIn < 10)){
+        draw_x(dataIn);
+      }
+      else if ((dataIn > 10) and (dataIn < 14)){
+        end_case(dataIn);
+      }
+    } 
+  }
+  delay(100);
 }
 
 //method to lift pen from board
@@ -250,11 +184,6 @@ void draw(int change_x, int change_y){
   current_y = current_y + change_y;
   pen_up();
   lcd_start_message();
-  
-  Serial.print("moving to pos: (");
-  Serial.print(current_x);
-  Serial.print(" ");
-  Serial.println(current_y);
 }
 
 // method to move pen from one cartesian coordinate to another
@@ -268,11 +197,6 @@ void move_pen(int change_x, int change_y){
   current_x = current_x + change_x;
   current_y = current_y + change_y;
   lcd_start_message(); 
-
-  Serial.print("moving to pos: (");
-  Serial.print(current_x);
-  Serial.print(" ");
-  Serial.println(current_y);
 }
 
 void draw_TTC_grid() {
@@ -285,6 +209,15 @@ void draw_TTC_grid() {
   move_pen(0, -75);
   draw(220,0);
   return_home(); 
+  lcd.clear();
+  lcd.setCursor(2,0);
+  lcd.print("PLEASE RUN");
+  lcd.setCursor(2,1);
+  lcd.print("PYTHON SCRIPT");
+  delay(3000);
+  lcd.clear();
+  lcd.setCursor(2,0);
+  lcd.print("YOUR TURN");
 }
 
 // test method
@@ -374,7 +307,7 @@ void lcd_start_message() {
   lcd.print("Tic-Tac-Toe");
 }
 
-// display "DRAWING" on LCD
+// display "DRAWING" on LCD 
 void lcd_drawing_message() {
   lcd.clear();
   lcd.setCursor(4,0);
@@ -394,7 +327,20 @@ void lcd_user_turn() {
   lcd.print("YOUR TURN");
 }
 
+void lcd_pl_ai_turn() {
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("MAKING MOVE");
+}
+    
+
+void end_case(int winner_code){
+  lcd_display_winner(winner_code);
+  wipe_board();
+}
+
 void draw_x(int element){
+  lcd_pl_ai_turn();
   switch (element){
     case 1:
       move_pen(5,90);
@@ -460,21 +406,34 @@ void draw_x(int element){
       return_home(); 
       break; 
   }
+  lcd_user_turn();
 }
 
-// self explanatory
-void lcd_display_winner() {
-
-}
-
-// start the game
-void gesture_start (){
-  
-}
-
-//end the game
-void gesture_end (){
-  
+void lcd_display_winner(int winner_code) {
+  switch (winner_code){
+      case 11: 
+        lcd.clear();
+        lcd.setCursor(6,0);
+        lcd.print("HAHA");
+        lcd.setCursor(5,1);
+        lcd.print("I WIN");
+       break;
+       case 12:
+        lcd.clear();
+        lcd.setCursor(6,0);
+        lcd.print("WOW");
+        lcd.setCursor(5,1);
+        lcd.print("YOU WON");
+       break;
+       case 13:
+        lcd.clear();
+        lcd.setCursor(3,0);
+        lcd.print("ALL THAT");
+        lcd.setCursor(2,1);
+        lcd.print("FOR A DRAW");
+       break; 
+    }
+    game_end = true; 
 }
 
 // converts xy distance change to change in motor angles
@@ -497,27 +456,27 @@ int * turns_to_dist(int start_x, int start_y, int x_dist_delta, int y_dist_delta
     int rot_right = steps_per_rot * (delta_belt_dist_right) / pulley_diameter;
     
     rotations[1] = rot_left;
-    Serial.print("L: ");
-    Serial.println(rot_left);
+    //Serial.print("L: ");
+    //Serial.println(rot_left);
     rotations[0] = rot_right;
-    Serial.print("R: ");
-    Serial.println(rot_right);
+    //Serial.print("R: ");
+    //Serial.println(rot_right);
 
     // determine whether to rotate each motor cw or ccw
     if (rot_left < 0){
           digitalWrite(X_DIR_PIN, LOW);
-          Serial.println("left: ccw");
+          //Serial.println("left: ccw");
     } else {
           digitalWrite(X_DIR_PIN, HIGH);
-          Serial.println("left: cw");
+          //Serial.println("left: cw");
 
     };
     if (rot_right < 0){
-          Serial.println("right: cw");
+          //Serial.println("right: cw");
           digitalWrite(Y_DIR_PIN, HIGH);
     } else {
           digitalWrite(Y_DIR_PIN, LOW);
-          Serial.println("right: ccw");
+          //Serial.println("right: ccw");
 
     };
     return rotations;
@@ -575,8 +534,8 @@ void stepper_speed_ratio(int x_steps, int y_steps, int steps_per) {
         y_completed++;
         single_step_y();
     }
-    Serial.print("X completed: ");
-    Serial.println(x_completed);
-    Serial.print("Y completed: ");
-    Serial.println(y_completed);
+    //Serial.print("X completed: ");
+    //Serial.println(x_completed);
+    //Serial.print("Y completed: ");
+    //Serial.println(y_completed);
 } 
