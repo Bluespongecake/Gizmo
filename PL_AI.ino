@@ -38,9 +38,15 @@
 int current_x;
 int current_y;
 
-//Duration of sound wave travel 
+//Duration and caluclated distance of sound wave travel 
 //1 -> Top 
 //3 -> Bottom 
+long duration1;
+int distance1; 
+long duration2;
+int distance2; 
+long duration3;
+int distance3; 
 
 //Store steps to be made 
 int x_steps_to_be_made;
@@ -71,6 +77,13 @@ void setup() {
   pinMode(Z_ENABLE_PIN, OUTPUT);
   digitalWrite(Z_ENABLE_PIN, LOW);
 
+  pinMode(trigPin1, OUTPUT); 
+  pinMode(echoPin1, INPUT);
+  pinMode(trigPin2, OUTPUT); 
+  pinMode(echoPin2, INPUT);
+  pinMode(trigPin3, OUTPUT); 
+  pinMode(echoPin3, INPUT);
+
   penServo.attach(11);
 
   lcd.begin(16, 2);
@@ -84,16 +97,133 @@ void setup() {
   current_y = 150;
 
   //TEST CODE - SINGLE RUN
-  draw_TTC_grid(); 
+  //draw_TTC_grid();  
 
-  //wipe_board();
-  
- 
+//  draw_TTC_grid();
+//  draw_x(1);
+//  draw_x(5);
+//  draw_x(9); 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+//  digitalWrite(trigPin1, LOW);
+//  delayMicroseconds(2);
+//  digitalWrite(trigPin1, HIGH);
+//  delayMicroseconds(10);
+//  digitalWrite(trigPin1, LOW);
+//  duration1 = pulseIn(echoPin1, HIGH);
+//  distance1 = duration1 * 0.034 / 2;
+//
+//  digitalWrite(trigPin3, LOW);
+//  delayMicroseconds(2);
+//  digitalWrite(trigPin3, HIGH);
+//  delayMicroseconds(10);
+//  digitalWrite(trigPin3, LOW);
+//  duration3 = pulseIn(echoPin1, HIGH);
+//  distance3 = duration3 * 0.034 / 2;
+//  
+//  
+//  if (distance1 < 5){
+//    digitalWrite(trigPin2, LOW);
+//    delayMicroseconds(2);
+//    digitalWrite(trigPin2, HIGH);
+//    delayMicroseconds(10);
+//    digitalWrite(trigPin2, LOW);
+//    duration2 = pulseIn(echoPin2, HIGH);
+//    distance2 = duration2 * 0.034 / 2;
+//
+//    if (distance2 < 5){
+//      digitalWrite(trigPin3, LOW);
+//      delayMicroseconds(2);
+//      digitalWrite(trigPin3, HIGH);
+//      delayMicroseconds(10);
+//      digitalWrite(trigPin3, LOW);
+//      duration3 = pulseIn(echoPin3, HIGH);
+//      distance3 = duration3 * 0.034 / 2;
+//
+//      if (distance3 < 5){
+//        Serial.println("1 to 3"); 
+//        distance1 = 0;
+//        distance2 = 0;
+//        distance3 =0; 
+//      }
+//    }
+//  } else if (distance3 < 5){
+//    digitalWrite(trigPin2, LOW);
+//    delayMicroseconds(2);
+//    digitalWrite(trigPin2, HIGH);
+//    delayMicroseconds(10);
+//    digitalWrite(trigPin2, LOW);
+//    duration2 = pulseIn(echoPin2, HIGH);
+//    distance2 = duration2 * 0.034 / 2;
+//
+//    if (distance2 < 5){
+//      digitalWrite(trigPin1, LOW);
+//      delayMicroseconds(2);
+//      digitalWrite(trigPin1, HIGH);
+//      delayMicroseconds(10);
+//      digitalWrite(trigPin1, LOW);
+//      duration1 = pulseIn(echoPin1, HIGH);
+//      distance1 = duration1 * 0.034 / 2;
+//
+//      if (distance1 < 5){
+//        Serial.println("3 to 1"); 
+//        distance1 = 0;
+//        distance2 = 0;
+//        distance3 =0; 
+//      }
+//    }
+//  }
+//  distance1 = 0;
+//  distance2 = 0;
+//  distance3 =0;
 
+
+  digitalWrite(trigPin1, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin1, LOW);
+  duration1 = pulseIn(echoPin1, HIGH);
+  distance1 = duration1 * 0.034 / 2;
+
+  digitalWrite(trigPin3, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin3, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin3, LOW);
+  duration3 = pulseIn(echoPin3, HIGH);
+  distance3 = duration3 * 0.034 / 2;
+
+
+
+ if (distance1 < 5){
+    digitalWrite(trigPin2, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin2, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin2, LOW);
+    duration2 = pulseIn(echoPin2, HIGH);
+    distance2 = duration2 * 0.034 / 2;
+
+    if (distance2 < 5){
+      digitalWrite(trigPin3, LOW);
+      delayMicroseconds(2);
+      digitalWrite(trigPin3, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(trigPin3, LOW);
+      duration3 = pulseIn(echoPin3, HIGH);
+      distance3 = duration3 * 0.034 / 2;
+
+      if (distance3 < 5){
+        Serial.println("1 to 3"); 
+        distance1 = 0;
+        distance2 = 0;
+        distance3 =0; 
+      }
+    }
+  } 
+  delay(300);
 }
 
 //method to lift pen from board
@@ -214,6 +344,7 @@ void wipe_board(){
   };
 }
 
+//Return back to "home" posititon with the pen up 
 void return_home(){
   move_pen(180-current_x,150-current_y);
 }
@@ -261,6 +392,74 @@ void lcd_user_turn() {
   lcd.clear();
   lcd.setCursor(3,0);
   lcd.print("YOUR TURN");
+}
+
+void draw_x(int element){
+  switch (element){
+    case 1:
+      move_pen(5,90);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home();
+    break;   
+    case 2:
+      move_pen(80,90);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home();
+    break; 
+    case 3:
+      move_pen(155,90);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home();
+      break;
+    case 4:
+      move_pen(5,170);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home();
+      break;
+    case 5:
+      move_pen(80,170);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home();
+      break;
+    case 6:
+      move_pen(155,170);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home();
+      break;
+    case 7:
+      move_pen(5,230);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home();
+      break;
+    case 8:
+      move_pen(80,230);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home();
+      break;
+    case 9:
+      move_pen(155,230);
+      draw(40,40);
+      move_pen(0,-40);
+      draw(-40,40);
+      return_home(); 
+      break; 
+  }
 }
 
 // self explanatory
